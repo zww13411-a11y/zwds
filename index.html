@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>紫微斗数排盘 · 实时滚动</title>
+  <link rel="stylesheet" href="css/style.css?v=7" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <h1>紫微斗数排盘</h1>
+      <div class="input-row">
+        <label>
+          <input type="radio" name="calendarType" value="solar" checked />
+          公历
+        </label>
+        <label>
+          <input type="radio" name="calendarType" value="lunar" />
+          农历
+        </label>
+        <input type="text" id="dateInput" value="1990-05-15" placeholder="公历:1990-05-15 或 农历:1990-4-21" />
+        <select id="hourInput"></select>
+        <select id="genderInput">
+          <option value="male" selected>男</option>
+          <option value="female">女</option>
+        </select>
+        <select id="schoolInput">
+          <option value="zhongzhou" selected>中州派</option>
+          <option value="quanshu">全书派</option>
+        </select>
+        <button id="calcBtn" class="btn-primary">开始排盘</button>
+        <button id="nowBtn" class="btn-secondary">用当前时间</button>
+      </div>
+    </header>
+
+    <main class="main">
+      <aside class="steps-panel">
+        <h2>计算过程</h2>
+        <div id="stepsList" class="steps-list"></div>
+      </aside>
+
+      <section class="chart-area">
+        <div class="tabs">
+          <button class="tab active" data-scope="origin">本命盘</button>
+          <button class="tab" data-scope="decadal">大限</button>
+          <button class="tab" data-scope="age">小限</button>
+          <button class="tab" data-scope="yearly">流年</button>
+          <button class="tab" data-scope="monthly">流月</button>
+          <button class="tab" data-scope="daily">流日</button>
+          <button class="tab" data-scope="hourly">流时</button>
+        </div>
+        <div id="nestedNav" class="nested-nav"></div>
+        <div id="chartBox" class="chart-box"></div>
+        <div id="horoscopeInfo" class="horoscope-info"></div>
+        <div id="analysisPanel" class="analysis-panel">
+          <div class="analysis-header">
+            <h3>📊 命盘分析</h3>
+            <div class="analysis-tabs">
+              <button class="analysis-tab active" data-atab="overlay">叠盘对照</button>
+              <button class="analysis-tab" data-atab="events">事件预判</button>
+              <button class="analysis-tab" data-atab="sanfang">三方四正</button>
+              <button class="analysis-tab" data-atab="markers">结构标记</button>
+              <button class="analysis-tab" data-atab="aigpt">AI 解读</button>
+            </div>
+          </div>
+          <div id="analysisContent" class="analysis-content"></div>
+        </div>
+        <div class="timeline">
+          <button id="followRealtime" class="active">跟随实时</button>
+          <input type="range" id="timeSlider" min="0" max="100" value="50" />
+          <span id="targetTime"></span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="lib/iztro.min.js?v=7"></script>
+  <script src="js/data-tables.js?v=7"></script>
+  <script src="js/engine.js?v=7"></script>
+  <script src="js/llm-export.js?v=7"></script>
+  <script src="js/config.js?v=7"></script>
+  <script src="js/state.js?v=7"></script>
+  <script src="js/utils.js?v=7"></script>
+  <script src="js/api.js?v=7"></script>
+  <script src="js/chart-renderer.js?v=7"></script>
+  <script src="js/horoscope.js?v=7"></script>
+  <script src="js/analysis.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
+</body>
+</html>
+

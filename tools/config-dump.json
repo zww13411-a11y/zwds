@@ -1,0 +1,16 @@
+{
+  "mutagens": {
+    "gengHeavenly": [
+      "taiyangMaj",
+      "wuquMaj",
+      "tianfuMaj",
+      "tiantongMaj"
+    ]
+  },
+  "brightness": {},
+  "yearDivide": "normal",
+  "ageDivide": "normal",
+  "dayDivide": "forward",
+  "horoscopeDivide": "normal",
+  "algorithm": "default"
+}
