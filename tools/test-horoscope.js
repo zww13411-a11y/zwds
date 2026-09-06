@@ -1,6 +1,8 @@
-const { astro } = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/index.js');
+const { astro } = require('iztro/lib/index.js');
 const fs = require('fs');
 const vm = require('vm');
+const path = require('path');
+const root = path.resolve(__dirname, '..');
 
 function parseChineseNumber(s) {
   const map = { '〇': 0, '零': 0, '一': 1, '二': 2, '三': 3, '四': 4, '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10, '正': 1, '冬': 11, '腊': 12 };
@@ -35,8 +37,8 @@ function runCase(label, lunarDate, hourIndex, gender, targetDate, targetHourInde
 
   const context = { console, require, module, exports, globalThis: {} };
   vm.createContext(context);
-  vm.runInContext(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/data-tables.js', 'utf8'), context);
-  vm.runInContext(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/engine.js', 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(root, 'js', 'data-tables.js'), 'utf8'), context);
+  vm.runInContext(fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8'), context);
   const engine = new context.globalThis.ZWDSEngine({
     yearStem: a.rawDates.chineseDate.yearly[0],
     yearBranch: a.rawDates.chineseDate.yearly[1],

@@ -2,7 +2,7 @@ const { JSDOM } = require('jsdom');
 const fs = require('fs');
 const path = require('path');
 
-const root = 'C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds';
+const root = path.resolve(__dirname, '..');
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const dom = new JSDOM(html, { runScripts: 'dangerously', resources: 'usable', url: 'file:///' + root.replace(/\\/g, '/') + '/index.html' });
 const win = dom.window;

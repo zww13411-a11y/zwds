@@ -1,6 +1,7 @@
 // 从 iztro 提取数据表,生成 js/data-tables.js 供网页手写引擎使用
 const fs = require('fs');
-const base = 'C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib';
+const path = require('path');
+const base = path.dirname(require.resolve('iztro/lib/index.js'));
 const d = require(base + '/data/index.js');
 const hs = require(base + '/data/heavenlyStems.js');
 const zhStar = require(base + '/i18n/locales/zh-CN/star.js');
@@ -41,7 +42,7 @@ const MUTAGEN_TABLE_QUANSHU = ${JSON.stringify(mutagenDefault, null, 2)};
 const MUTAGEN_TABLE_ZHONGZHOU = JSON.parse(JSON.stringify(MUTAGEN_TABLE_QUANSHU));
 MUTAGEN_TABLE_ZHONGZHOU['庚'] = ['太阳', '武曲', '天府', '天同'];
 `;
-fs.writeFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/data-tables.js', out);
+fs.writeFileSync(path.join(__dirname, '..', 'js', 'data-tables.js'), out);
 console.log('written. stars:', Object.keys(brightness).length);
 console.log('sample 紫微:', JSON.stringify(brightness['紫微']));
 console.log('sample 武曲:', JSON.stringify(brightness['武曲']));

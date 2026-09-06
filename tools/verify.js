@@ -1,5 +1,5 @@
 // 验证 iztro API + 建立案例A/B基准数据
-const iztro = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/index.js');
+const iztro = require('iztro/lib/index.js');
 const { astro } = iztro;
 
 // 中州派配置

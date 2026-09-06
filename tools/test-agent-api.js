@@ -1,12 +1,14 @@
 const { JSDOM } = require('jsdom');
 const fs = require('fs');
+const path = require('path');
 
-const html = fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/index.html', 'utf8');
+const root = path.resolve(__dirname, '..');
+const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const dom = new JSDOM(html, { runScripts: 'dangerously', resources: 'usable', url: 'file:///tmp.html' });
 const win = dom.window;
 
 ['lib/iztro.min.js', 'js/data-tables.js', 'js/engine.js', 'js/app.js'].forEach(f => {
-  win.eval(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/' + f, 'utf8'));
+  win.eval(fs.readFileSync(path.join(root, f), 'utf8'));
 });
 
 win.document.addEventListener('DOMContentLoaded', () => setTimeout(() => {

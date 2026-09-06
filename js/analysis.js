@@ -409,10 +409,11 @@
   let _currentController = null;
 
   function _getSavedKey() {
-    try { return localStorage.getItem('zwds_deepseek_key') || ''; } catch (e) { return ''; }
+    try { localStorage.removeItem('zwds_deepseek_key'); } catch (e) {}
+    try { return sessionStorage.getItem('zwds_deepseek_key') || ''; } catch (e) { return ''; }
   }
   function _saveKey(k) {
-    try { localStorage.setItem('zwds_deepseek_key', k); } catch (e) {}
+    try { sessionStorage.setItem('zwds_deepseek_key', k); } catch (e) {}
   }
   function _getSavedBase() {
     try {
@@ -441,9 +442,9 @@
 
     let keyHtml = '';
     if (savedKey) {
-      keyHtml = '<div class="aigpt-key-saved">🔑 API Key 已保存（' + savedKey.slice(0, 6) + '...）<button id="aigptChangeKey" class="btn-text">更换</button><button id="aigptDeleteKey" class="btn-text" style="margin-left:8px;color:var(--red);">删除</button></div>';
+      keyHtml = '<div class="aigpt-key-saved">🔑 API Key 已保存到当前会话（' + savedKey.slice(0, 6) + '...）<button id="aigptChangeKey" class="btn-text">更换</button><button id="aigptDeleteKey" class="btn-text" style="margin-left:8px;color:var(--red);">删除</button></div>';
     } else {
-      keyHtml = '<div class="aigpt-key-setup"><div class="aigpt-key-help">🔑 需要 <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" style="color:var(--accent);">DeepSeek API Key</a>（注册送免费额度），填入后仅保存在本机浏览器，不会上传任何服务器。</div>' +
+      keyHtml = '<div class="aigpt-key-setup"><div class="aigpt-key-help">🔑 需要 <a href="https://platform.deepseek.com/api_keys" target="_blank" rel="noopener" style="color:var(--accent);">DeepSeek API Key</a>（注册送免费额度），填入后仅保存在当前标签页会话，关闭后自动清除。</div>' +
         '<div class="aigpt-config-row" style="margin-top:6px;"><label>API Key：</label><input type="password" id="aigptKey" placeholder="sk-..." style="flex:1;" /><select id="aigptModel"><option value="deepseek-chat">deepseek-chat</option><option value="deepseek-reasoner">deepseek-reasoner</option></select></div></div>';
     }
 
@@ -483,13 +484,13 @@
       doCopyAIData();
     } else if (btn.id === 'aigptChangeKey') {
       e.preventDefault();
-      try { localStorage.removeItem('zwds_deepseek_key'); } catch (ex) {}
+      try { sessionStorage.removeItem('zwds_deepseek_key'); } catch (ex) {}
       _aiOutputCache = '';
       renderAnalysisPanel();
     } else if (btn.id === 'aigptDeleteKey') {
       e.preventDefault();
       if (confirm('确定删除已保存的 API Key 吗？')) {
-        try { localStorage.removeItem('zwds_deepseek_key'); localStorage.removeItem('zwds_base_url'); } catch (ex) {}
+        try { sessionStorage.removeItem('zwds_deepseek_key'); localStorage.removeItem('zwds_base_url'); } catch (ex) {}
         _aiOutputCache = '';
         renderAnalysisPanel();
       }

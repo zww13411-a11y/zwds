@@ -1,7 +1,7 @@
 # 紫微斗数网页排盘工具 — 完整项目报告（面向 AI Agent）
 
 > **版本**: 2026-07-29T22:40  
-> **位置**: `C:\Users\USER\Desktop\zwds`  
+> **位置**: 项目根目录
 > **目标读者**: 其他 AI Agent / LLM  
 > 读完本文档后，一个全新的 AI Agent 应该能够：理解项目架构、知道每个文件的职责、复现完整开发历程、在此基础上继续扩展。
 
@@ -18,14 +18,14 @@
 4. **事件预判**：对事业/财运/感情/健康/家庭/人际/迁移/官非/学业/子女 10大领域自动评分
 5. **三方四正**：每宫三合宫 + 对宫 + 四正吉凶评分
 6. **结构标记**：夹宫、日月状态、格局识别、空宫、伏吟
-7. **AI 解读**：内置 DeepSeek 调用通道（V3/R1），API Key 本地 localStorage 持久化，一键调用 LLM 生成命理解读
+7. **AI 解读**：内置 DeepSeek 调用通道（V3/R1），API Key 仅保存在当前标签页会话，一键调用 LLM 生成命理解读
 
 ---
 
 ## 二、文件结构（按创建/修改时序）
 
 ```
-C:\Users\USER\Desktop\zwds\
+zwds\
 ├── 📄 index.html           (3.6 KB)  入口页面
 ├── 📄 report.md            (11 KB)   技术文档（→ 本文）
 ├── 📄 report.html          (~30 KB)  技术文档网页版
@@ -156,17 +156,17 @@ C:\Users\USER\Desktop\zwds\
 
 ### Phase 5 — 用户体验改进 + Bug 修复（2026-07-29 晚上）
 
-**改进：API Key 本地存储**
-- `_getSavedKey()` / `_saveKey(k)` → `localStorage.zwds_deepseek_key`
-- 填过一次自动记住，刷新/关浏览器后还在
-- 已保存时显示 `🔑 API Key 已保存（sk-xxxx...）[更换]`
-- 点「更换」清空 localStorage + 缓存 → 重新显示输入框
+**改进：API Key 会话存储**
+- `_getSavedKey()` / `_saveKey(k)` → `sessionStorage.zwds_deepseek_key`
+- 当前标签页刷新后仍可使用，关闭标签页后自动清除
+- 已保存时显示 `🔑 API Key 已保存到当前会话（sk-xxxx...）[更换]`
+- 点「更换」清空 sessionStorage + 缓存 → 重新显示输入框
 - 未保存时显示注册引导 + 免费额度说明 + 数据安全声明
 
 **改进：新手引导**
 - 链接到 platform.deepseek.com/api_keys
 - "注册即送 500 万 token 免费额度"
-- "填入后自动保存在浏览器本地，不会上传到任何服务器"
+- "填入后仅保存在当前标签页会话，关闭后自动清除"
 - 「复制数据」按钮始终可见（不管有没有 Key），可粘贴到 ChatGPT/Claude 等
 
 **Bug 修复 1：key 当 DOM 元素用**
@@ -178,7 +178,7 @@ callDeepSeek(..., key.value.trim()) // 💥 字符串无 .value 属性
 // 🟢 修复后
 var keyEl = $('#aigptKey');
 var key = keyEl ? keyEl.value.trim() : '';
-if (!key) { key = _getSavedKey(); } // fallback localStorage
+if (!key) { key = _getSavedKey(); } // fallback sessionStorage
 callDeepSeek(..., key, model);      // 字符串直接传
 ```
 
@@ -447,7 +447,9 @@ window.ZWDSLLMExport.buildStructuralMarkers(...)
 ### 无人介入 Agent 调用流程
 ```js
 // 1. 浏览器自动化注入脚本
-await page.goto('file:///C:/Users/USER/Desktop/zwds/index.html');
+const { pathToFileURL } = require('url');
+const path = require('path');
+await page.goto(pathToFileURL(path.resolve('index.html')).href);
 await page.waitForFunction(() => window.zwdsAPI?.getState()?.astrolabe);
 
 // 2. 设置出生信息
@@ -473,7 +475,7 @@ const data = await page.evaluate(() => window.zwdsAPI.exportLLMData());
 
 | Bug | 严重度 | 修复 |
 |-----|--------|------|
-| AI Key 从 localStorage 取出后当 DOM 对象用 `.value` 报错 | 🔴 致命 | `key` 作为纯字符串直接传给 `callDeepSeek` |
+| AI Key 从会话存储取出后当 DOM 对象用 `.value` 报错 | 🔴 致命 | `key` 作为纯字符串直接传给 `callDeepSeek` |
 | 未保存 Key 时复制数据按钮被条件隐藏 | 🟡 中等 | `actionRow` 始终渲染，仅模型选择+分析按钮有条件 |
 | AI 面板在分析面板外部，标签切换割裂 | 🟡 UI | 迁移到 `renderAnalysisPanel()` 的 `case 'aigpt'` 分支 |
 

@@ -20,7 +20,10 @@ const fs = require('fs');
 const path = require('path');
 
 const PORT = process.env.PORT || 8787;
+const HOST = process.env.HOST || '127.0.0.1';
 const DEFAULT_LLM_URL = 'https://api.deepseek.com/chat/completions';
+const MAX_BODY_BYTES = 1024 * 1024;
+const UPSTREAM_TIMEOUT_MS = 30_000;
 const ROOT = path.join(__dirname, '..'); // zwds 根目录
 
 const MIME = {
@@ -38,34 +41,44 @@ const server = http.createServer((req, res) => {
 
   // 预检
   if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    });
+    res.writeHead(204, { Allow: 'GET, POST, OPTIONS' });
     return res.end();
   }
 
   // LLM 代理
   if (req.method === 'POST' && url.pathname === '/api/llm') {
     let body = '';
-    req.on('data', (c) => (body += c));
+    let bodyBytes = 0;
+    let bodyTooLarge = false;
+    req.on('data', (chunk) => {
+      bodyBytes += chunk.length;
+      if (bodyBytes > MAX_BODY_BYTES) {
+        bodyTooLarge = true;
+        res.writeHead(413, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'request body too large' }));
+        req.destroy();
+        return;
+      }
+      body += chunk;
+    });
     req.on('end', () => {
-      let targetURL = DEFAULT_LLM_URL;
-      try {
-        const parsed = JSON.parse(body);
-        if (parsed && parsed.base_url) {
-          targetURL = parsed.base_url;
-          delete parsed.base_url;
-          body = JSON.stringify(parsed);
-        }
-      } catch (e) {}
+      if (bodyTooLarge) return;
 
-      const target = new URL(targetURL);
-      const isHttps = target.protocol === 'https:';
+      let parsed;
+      try {
+        parsed = JSON.parse(body);
+      } catch (e) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'invalid JSON body' }));
+      }
+
+      // 本地代理只允许固定的 DeepSeek 端点，避免被当作开放代理或 SSRF 通道。
+      delete parsed.base_url;
+      body = JSON.stringify(parsed);
+
+      const target = new URL(DEFAULT_LLM_URL);
       const auth = req.headers['authorization'] || '';
-      const requester = isHttps ? https : http;
-      const upstream = requester.request(
+      const upstream = https.request(
         target,
         {
           method: 'POST',
@@ -85,8 +98,12 @@ const server = http.createServer((req, res) => {
         }
       );
       upstream.on('error', (e) => {
+        if (res.headersSent) return res.end();
         res.writeHead(502, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'proxy error: ' + e.message }));
+      });
+      upstream.setTimeout(UPSTREAM_TIMEOUT_MS, () => {
+        upstream.destroy(new Error('upstream timeout'));
       });
       upstream.write(body);
       upstream.end();
@@ -97,8 +114,8 @@ const server = http.createServer((req, res) => {
   // 静态文件
   let p = decodeURIComponent(url.pathname);
   if (p === '/') p = '/index.html';
-  const filePath = path.join(ROOT, p);
-  if (!filePath.startsWith(ROOT)) {
+  const filePath = path.resolve(ROOT, '.' + p);
+  if (filePath !== ROOT && !filePath.startsWith(ROOT + path.sep)) {
     res.writeHead(403);
     return res.end('forbidden');
   }
@@ -115,8 +132,8 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log('✅ zwds 已启动： http://localhost:' + PORT);
+server.listen(PORT, HOST, () => {
+  console.log('✅ zwds 已启动： http://' + HOST + ':' + PORT);
   console.log('   AI 解读走同源代理 /api/llm → DeepSeek（零跨域）');
   console.log('   停止：Ctrl+C');
 });

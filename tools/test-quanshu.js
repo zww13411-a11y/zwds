@@ -1,7 +1,9 @@
 // 验证网页端全书派四化
 const fs = require('fs');
 const vm = require('vm');
-const iztro = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/index.js');
+const path = require('path');
+const iztro = require('iztro/lib/index.js');
+const root = path.resolve(__dirname, '..');
 
 // 重置为全书派
 iztro.astro.config({ algorithm: 'default', mutagens: { gengHeavenly: ['taiyangMaj', 'wuquMaj', 'taiyinMaj', 'tiantongMaj'] } });
@@ -12,8 +14,8 @@ console.log('iztro 全书派 四化:', mut.join(' '));
 
 const context = { console, require, module, exports, globalThis: {} };
 vm.createContext(context);
-vm.runInContext(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/data-tables.js', 'utf8'), context);
-vm.runInContext(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/engine.js', 'utf8'), context);
+vm.runInContext(fs.readFileSync(path.join(root, 'js', 'data-tables.js'), 'utf8'), context);
+vm.runInContext(fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8'), context);
 const e = new context.globalThis.ZWDSEngine({ yearStem: '庚', yearBranch: '午', lunarMonth: 4, lunarDay: 21, hourIndex: 4, gender: 'male', school: 'quanshu' }).compute();
 const enMut = [];
 e.palaces.forEach(p => p.stars.forEach(s => { if (s.mutagen) enMut.push(`${s.name}化${s.mutagen}@${p.branch}`); }));

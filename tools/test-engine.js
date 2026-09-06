@@ -1,14 +1,16 @@
 // 测试手写引擎与 iztro 对拍
 const fs = require('fs');
 const vm = require('vm');
-const iztro = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/index.js');
+const path = require('path');
+const iztro = require('iztro/lib/index.js');
 const { astro } = iztro;
+const root = path.resolve(__dirname, '..');
 
 // 构造浏览器上下文
 const context = { console, require, module, exports, globalThis: {} };
 vm.createContext(context);
-vm.runInContext(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/data-tables.js', 'utf8'), context);
-vm.runInContext(fs.readFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/js/engine.js', 'utf8'), context);
+vm.runInContext(fs.readFileSync(path.join(root, 'js', 'data-tables.js'), 'utf8'), context);
+vm.runInContext(fs.readFileSync(path.join(root, 'js', 'engine.js'), 'utf8'), context);
 
 function runEngine(lunarStr, timeIndex, gender, school) {
   // 用 iztro 拿到年月干支（先重置配置避免 require 缓存污染）

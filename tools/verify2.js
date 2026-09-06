@@ -1,7 +1,8 @@
 // 验证 mutagens 覆盖 + 提取亮度表 + 确认数据结构
-const iztro = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/index.js');
+const iztro = require('iztro/lib/index.js');
 const { astro } = iztro;
 const fs = require('fs');
+const path = require('path');
 
 // 1. 覆盖庚年四化为中州派: 太阳禄 武曲权 天府科 天同忌
 astro.config({ mutagens: { gengHeavenly: ['taiyangMaj', 'wuquMaj', 'tianfuMaj', 'tiantongMaj'] } });
@@ -10,16 +11,16 @@ console.log('===== 覆盖后庚年四化 =====');
 a.palaces.forEach(p => [...p.majorStars, ...p.minorStars].forEach(s => { if (s.mutagen) console.log(`${s.name} 化${s.mutagen} @${p.earthlyBranch}(${p.name})`); }));
 
 // 2. 提取星曜亮度表
-const starData = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/star/index.js');
+const starData = require('iztro/lib/star/index.js');
 console.log('\n===== star 模块导出 =====', Object.keys(starData));
 
 // 3. 看 data 模块
-const data = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/data/index.js');
+const data = require('iztro/lib/data/index.js');
 console.log('===== data 模块导出 =====', Object.keys(data));
 
 // 4. 找亮度定义
 try {
-  const { getStarBrightness } = require('C:/Users/USER/Desktop/Claude-code/zwds-agent/node_modules/iztro/lib/star/brightness.js');
+  const { getStarBrightness } = require('iztro/lib/star/brightness.js');
   console.log('\nbrightness fn exists:', typeof getStarBrightness);
 } catch (e) { console.log('no brightness.js:', e.message); }
 
@@ -46,7 +47,7 @@ console.log('小限宫:', h.agePalace().earthlyBranch, h.agePalace().name);
 const allStars = ['ziweiMaj','tianjiMaj','taiyangMaj','wuquMaj','tiantongMaj','lianzhenMaj','tianfuMaj','taiyinMaj','tanlangMaj','jumenMaj','tianxiangMaj','tianliangMaj','qishaMaj','pojunMaj','zuofuMin','youbiMin','wenchangMin','wenquMin','tiankuiMin','tianyueMin','lucunMin','tianmaMin','qingyangMin','tuoluoMin','huoxingMin','lingxingMin','dikongMin','dijieMin'];
 const cfg = astro.getConfig();
 console.log('\n===== 当前 brightness 配置(keys) =====', Object.keys(cfg.brightness).length);
-fs.writeFileSync('C:/Users/USER/WorkBuddy/2026-07-28-23-15-09/zwds/tools/config-dump.json', JSON.stringify(cfg, null, 2));
+fs.writeFileSync(path.join(__dirname, 'config-dump.json'), JSON.stringify(cfg, null, 2));
 console.log('config dumped');
 
 // 10. astrolabe 顶层字段
